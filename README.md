@@ -2,6 +2,7 @@
 - [x] 更好的 typst 回退到 mathjax.
 - [x] 可自行设置 Wasm 获取网址. (已被合并)
 - [x] 更新 typst.ts 依赖版本 (on 2025-11-08). (已被合并)
+- [x] ``$#mitex(`...`)$`` 或 ``$$#mitex(`...`)$$`` 强制使用 obsidian 自带 latex 显示.
 
 ---
 
