@@ -47,6 +47,7 @@ export default {
 
 	// Errors
 	illegalTypstMathCode: "illegal typst math code.",
+	forceLatexMathCode: "forced latex math code.",
 
 	// Custom Language Templates
 	customLanguageTemplates: "Custom Language Templates",

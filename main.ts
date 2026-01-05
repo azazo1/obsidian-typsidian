@@ -96,6 +96,13 @@ export default class TypsidianPlugin extends Plugin {
 
 	typstTex2Html(source: string, r: { display: boolean }): ChildNode | null {
 		try {
+			let matched = source.match(/^\s*#mitex\(`([\s\S]*)`\)\s*$/);
+			if (matched) {
+				if (matched.length > 1) {
+					source = matched[1];
+					throw new Error(t("forceLatexMathCode"));
+				}
+			}
 			if (r.display) {
 				if (this.settings.enableMathBlockTypst) {
 					TypstSvgElement.regisiter();

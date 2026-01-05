@@ -36,6 +36,7 @@ export default {
 
 	// Errors
 	illegalTypstMathCode: "非法的 typst 數學代碼。",
+	forceLatexMathCode: "強制 LaTeX 數學代碼。",
 
 	// Custom Language Templates
 	customLanguageTemplates: "自定義語言模板",
