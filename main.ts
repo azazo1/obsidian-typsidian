@@ -124,7 +124,8 @@ export default class TypsidianPlugin extends Plugin {
 					throw new Error(t("illegalTypstMathCode"));
 				}
 				let renderedNode = this.tex2html(typst2tex(source), r);
-				if (renderedNode.querySelectorAll('[style*="color: red"]').length > 0) {
+				if (renderedNode.querySelector("mjx-merror")
+					|| renderedNode.querySelector('[style*="color: red"]')) {
 					throw new Error(t("illegalTypstMathCode"));
 				}
 				return renderedNode;
