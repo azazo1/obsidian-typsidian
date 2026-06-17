@@ -1,8 +1,13 @@
-相比上游仓库:
-- [x] 更好的 typst 回退到 mathjax.
-- [x] 可自行设置 Wasm 获取网址. (已被合并)
-- [x] 更新 typst.ts 依赖版本 (on 2025-11-08). (已被合并)
-- [x] ``$#mitex(`...`)$`` 或 ``$$#mitex(`...`)$$`` 强制使用 obsidian 自带 latex 显示.
+## 与上游仓库的差异
+
+本仓库基于 <https://github.com/fogsong233/Typsidian.git>, 当前主要差异:
+
+- 上游把行间 Typst 数学公式渲染为 Typst SVG, 行内 Typst 数学公式先经 `typst2tex` 转为 LaTeX 再交给 MathJax. 本仓库的行内和行间 Typst 数学公式都直接渲染为 Typst SVG.
+- 上游遇到反斜杠或 MathJax 报错时再走 LaTeX fallback. 本仓库会先识别明显的 LaTeX 写法, 并在 Typst 编译失败时回退到 Obsidian 原始 LaTeX 渲染.
+- 上游导出时会把行间 Typst 数学公式上传为图片, 行内 Typst 数学公式转成 LaTeX 文本. 本仓库导出时行内和行间 Typst 数学公式都上传为图片链接.
+- 移除 `tex2typst`, 并新增 `mathjax-full`.
+- 提供设置 URL 加载 typst.ts compiler 和 renderer wasm.
+- 修正了行间 LaTeX fallback 设置项绑定, 避免它错误读写行内 fallback 设置.
 
 ---
 

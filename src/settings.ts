@@ -140,9 +140,9 @@ export class TypsidianSettingTab extends PluginSettingTab {
 			.setDesc(t("enableFallBackToTexBlockDesc"))
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.enableFallBackToTexInline)
+					.setValue(this.plugin.settings.enableFallbackToTexBlock)
 					.onChange(async (value) => {
-						this.plugin.settings.enableFallBackToTexInline = value;
+						this.plugin.settings.enableFallbackToTexBlock = value;
 						await this.plugin.saveSettings();
 					})
 			);

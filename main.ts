@@ -4,9 +4,7 @@ import {
 	TypsidianPluginSettings,
 	TypsidianSettingTab,
 } from "src/settings";
-import { typst2tex } from "tex2typst";
 import TypstSvgElement from "src/typst-svg-element";
-import { t } from "src/lang/helpers";
 
 import { initTypst, regCmds } from "src/init";
 import { isDarkMode } from "src/util";
@@ -96,39 +94,25 @@ export default class TypsidianPlugin extends Plugin {
 
 	typstTex2Html(source: string, r: { display: boolean }): ChildNode | null {
 		try {
-			let matched = source.match(/^\s*#mitex\(`([\s\S]*)`\)\s*$/);
+			const matched = source.match(/^\s*#mitex\(`([\s\S]*)`\)\s*$/);
 			if (matched) {
 				if (matched.length > 1) {
-					source = matched[1];
-					throw new Error(t("forceLatexMathCode"));
+					return this.tex2html(matched[1], r);
 				}
 			}
+
 			if (r.display) {
 				if (this.settings.enableMathBlockTypst) {
-					TypstSvgElement.regisiter();
-					const el = document.createElement(
-						"typst-svg"
-					) as TypstSvgElement;
-					el.source = source;
-					el.typstContent = `${this.settings.mathTypstTemplate.replace(
-						"{IsDarkMode}",
-						isDarkMode() ? "true" : "false"
-					)} \n
-						/*__typsidian-divider*/
-						$ ${source} $`;
-					el.plugin = this;
-					return el;
+					if (this.looksLikeLatexMath(source)) {
+						return this.tex2html(source, r);
+					}
+					return this.createTypstWasmSvgElement(source, true);
 				}
 			} else if (this.settings.enableInlineMathTypst) {
-				if (source.includes("\\")) {
-					throw new Error(t("illegalTypstMathCode"));
+				if (this.looksLikeLatexMath(source)) {
+					return this.tex2html(source, r);
 				}
-				let renderedNode = this.tex2html(typst2tex(source), r);
-				if (renderedNode.querySelector("mjx-merror")
-					|| renderedNode.querySelector('[style*="color: red"]')) {
-					throw new Error(t("illegalTypstMathCode"));
-				}
-				return renderedNode;
+				return this.createTypstWasmSvgElement(source, false);
 			}
 			return this.tex2html(source, r);
 		} catch (error) {
@@ -143,5 +127,101 @@ export default class TypsidianPlugin extends Plugin {
 			return new DOMParser().parseFromString(renderedString, "text/html")
 				.body.firstChild;
 		}
+	}
+
+	private createTypstWasmSvgElement(
+		source: string,
+		displayMode: boolean
+	): TypstSvgElement {
+		TypstSvgElement.regisiter();
+		const el = document.createElement("typst-svg") as TypstSvgElement;
+		el.source = source;
+		el.isinline = !displayMode;
+		el.typstContent = this.buildMathTypstContent(source, displayMode);
+		el.plugin = this;
+		return el;
+	}
+
+	private buildMathTypstContent(
+		source: string,
+		displayMode: boolean
+	): string {
+		const template = this.settings.mathTypstTemplate.replace(
+			"{IsDarkMode}",
+			isDarkMode() ? "true" : "false"
+		);
+		const pageSetup =
+			`#set page(width: auto, height: auto, margin: ${displayMode ? "4pt" : "0pt"}, fill: none)`;
+		const mathSource = displayMode
+			? `$ ${source} $`
+			: `$${source.trim()}$`;
+		return `${template}\n${pageSetup}\n${mathSource}`;
+	}
+
+	private looksLikeLatexMath(source: string): boolean {
+		const text = source.trim();
+		if (text.length === 0) {
+			return false;
+		}
+		return (
+			this.hasLatexEscape(text) ||
+			this.hasLatexAlignmentTab(text) ||
+			this.hasLatexGroupedAttachment(text)
+		);
+	}
+
+	private hasLatexEscape(source: string): boolean {
+		return source.includes("\\");
+	}
+
+	private hasLatexAlignmentTab(source: string): boolean {
+		return /(^|[^\\])&/.test(source) && /(^|[^\\])\\\\/.test(source);
+	}
+
+	private hasLatexGroupedAttachment(source: string): boolean {
+		return this.findLatexGroupedAttachments(source).length > 0;
+	}
+
+	private findLatexGroupedAttachments(source: string): string[] {
+		const attachments: string[] = [];
+		for (let index = 0; index < source.length; index += 1) {
+			const marker = source[index];
+			if (marker !== "_" && marker !== "^") {
+				continue;
+			}
+			let cursor = index + 1;
+			while (cursor < source.length && /\s/.test(source[cursor])) {
+				cursor += 1;
+			}
+			if (source[cursor] !== "{") {
+				continue;
+			}
+			const closeIndex = this.findMatchingBrace(source, cursor);
+			if (closeIndex === -1) {
+				continue;
+			}
+			const content = source.slice(cursor + 1, closeIndex);
+			attachments.push(content);
+			index = closeIndex;
+		}
+		return attachments;
+	}
+
+	private findMatchingBrace(source: string, openIndex: number): number {
+		let depth = 0;
+		for (let index = openIndex; index < source.length; index += 1) {
+			const token = source[index];
+			if (token === "{") {
+				depth += 1;
+				continue;
+			}
+			if (token === "}") {
+				depth -= 1;
+				if (depth === 0) {
+					return index;
+				}
+			}
+		}
+		return -1;
 	}
 }

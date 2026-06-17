@@ -35,9 +35,6 @@ importers:
       sharp:
         specifier: ^0.34.3
         version: 0.34.3
-      tex2typst:
-        specifier: ^0.3.21
-        version: 0.3.21
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -1123,9 +1120,6 @@ packages:
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
     engines: {node: '>=8'}
-
-  tex2typst@0.3.21:
-    resolution: {integrity: sha512-faYgVSWCT9OJR7cm2HN2czL+3ZOkOBqvlQWd4HuZ3L6uVhgmL2UTuX7ApuMDqd8mT0P6HMht8BDBqHOuCzgQQA==}
 
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
@@ -2363,8 +2357,6 @@ snapshots:
   supports-color@7.2.0:
     dependencies:
       has-flag: 4.0.0
-
-  tex2typst@0.3.21: {}
 
   text-table@0.2.0: {}
 

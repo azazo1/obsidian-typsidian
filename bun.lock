@@ -14,7 +14,6 @@
         "remark-parse": "^11.0.0",
         "remark-stringify": "^11.0.0",
         "sharp": "^0.34.3",
-        "tex2typst": "^0.3.21",
         "unified": "^11.0.5",
       },
       "devDependencies": {
@@ -533,8 +532,6 @@
     "style-mod": ["style-mod@4.1.3", "", {}, "sha512-i/n8VsZydrugj3Iuzll8+x/00GH2vnYsk1eomD8QiRrSAeW6ItbCQDtfXCeJHd0iwiNagqjQkvpvREEPtW3IoQ=="],
 
     "supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
-
-    "tex2typst": ["tex2typst@0.3.26", "", {}, "sha512-RCu13wTYGRlb8GPczJYeE6XC/k04cVpwHlEM34ETK8FaMF8WOvL6kDpd+6mmGkG02kl1cppfSeZiyBPphMjV1A=="],
 
     "text-table": ["text-table@0.2.0", "", {}, "sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw=="],
 

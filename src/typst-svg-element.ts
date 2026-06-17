@@ -1,8 +1,5 @@
 import { $typst } from "@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs";
 import TypsidianPlugin from "main";
-import { texToSvg } from "./mathjax-render-svg";
-
-
 export default class TypstSvgElement extends HTMLElement {
 	typstContent: string;
 	plugin: TypsidianPlugin;
@@ -22,32 +19,68 @@ export default class TypstSvgElement extends HTMLElement {
 				mainContent: this.typstContent,
 			});
 		} catch (error) {
-			// fallback to latex (using mathjax)
-			// 看了下 main.ts, 这里好像是只有 block 才会触发, inline 则是直接使用 typst2tex.
-
-			if (this.plugin.settings.enableFallBackToTexInline && this.isinline) {
-				svgText = texToSvg(this.source, !this.isinline);
-			} else if (this.plugin.settings.enableFallbackToTexBlock && !this.isinline) {
-				svgText = texToSvg(this.source, !this.isinline);
-			} else {
-				svgText += "in: " + this.typstContent + "\n" + error;
+			if (this.renderLatexFallback()) {
+				return;
 			}
+			svgText = "in: " + this.typstContent + "\n" + error;
 		}
 
-		// 确保 shadowRoot 存在
 		if (this.shadowRoot) {
-			// avoid obsidian check of "i/n/n/e/r html", and i am sure it is safe, just due to interface design,
-			// i had to do that
-			(this.shadowRoot as any)[atob("aW5uZXJIVE1M")] = `
-				<style>
-					:host {
-						display: ${this.isinline ? "inline-block" : "block"};
-						text-align: center;
-					}
-				</style>
-				${svgText}
-			`;
+			this.renderSvg(svgText);
 		}
+	}
+
+	private renderLatexFallback(): boolean {
+		const displayMode = !this.isinline;
+		const enabled = this.isinline
+			? this.plugin.settings.enableFallBackToTexInline
+			: this.plugin.settings.enableFallbackToTexBlock;
+		if (!enabled) {
+			return false;
+		}
+		this.replaceWith(this.plugin.tex2html(this.source, { display: displayMode }));
+		return true;
+	}
+
+	private renderSvg(svgText: string) {
+		if (!this.shadowRoot) {
+			return;
+		}
+		const doc = new DOMParser().parseFromString(svgText, "text/html");
+		const svg = doc.querySelector("svg");
+		if (!svg) {
+			this.renderError(svgText);
+			return;
+		}
+		const style = document.createElement("style");
+		style.textContent = `
+			:host {
+				display: ${this.isinline ? "inline-block" : "block"};
+				text-align: ${this.isinline ? "left" : "center"};
+				vertical-align: -0.125em;
+				color: inherit;
+				max-width: 100%;
+				line-height: 0;
+				overflow-x: ${this.isinline ? "visible" : "auto"};
+			}
+			svg {
+				display: ${this.isinline ? "block" : "inline-block"};
+				max-width: 100%;
+				height: auto;
+				background: transparent;
+			}
+		`;
+		this.shadowRoot.replaceChildren(style, document.importNode(svg, true));
+	}
+
+	private renderError(message: string) {
+		if (!this.shadowRoot) {
+			return;
+		}
+		const span = document.createElement("span");
+		span.style.color = "red";
+		span.textContent = message;
+		this.shadowRoot.replaceChildren(span);
 	}
 
 	static regisiter() {

@@ -5,7 +5,6 @@ import TypsidianPlugin from "main";
 import remarkMath from "remark-math";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import { typst2tex } from "tex2typst";
 import { unified } from "unified";
 import Base64 from "./base64";
 import { Editor, MarkdownView, Notice } from "obsidian";
@@ -200,13 +199,7 @@ async function handleTypstMath(
 				{
 					type: "image",
 					url: await uploadGithubAndGetLink(
-						plugin.settings.mathTypstTemplate.replace(
-							"{IsDarkMode}",
-							"false"
-						) +
-							"\n \n $ " +
-							node.value +
-							" $",
+						buildMathTypstContent(plugin, node.value, true),
 						plugin,
 						uploader,
 						config
@@ -217,13 +210,37 @@ async function handleTypstMath(
 	}
 	if (node.type === "inlineMath" && plugin.settings.enableInlineMathTypst) {
 		try {
-			await $typst.svg({ mainContent: node.value });
-			node.value = typst2tex(node.value).replace("\n", " ");
+			return {
+				type: "image",
+				url: await uploadGithubAndGetLink(
+					buildMathTypstContent(plugin, node.value, false),
+					plugin,
+					uploader,
+					config
+				),
+			};
 		} catch {
-			/**/
+			return node;
 		}
 	}
 	return node;
+}
+
+function buildMathTypstContent(
+	plugin: TypsidianPlugin,
+	source: string,
+	displayMode: boolean
+): string {
+	const template = plugin.settings.mathTypstTemplate.replace(
+		"{IsDarkMode}",
+		"false"
+	);
+	const pageSetup =
+		`#set page(width: auto, height: auto, margin: ${displayMode ? "4pt" : "0pt"}, fill: none)`;
+	const mathSource = displayMode
+		? `$ ${source} $`
+		: `$${source.trim()}$`;
+	return `${template}\n${pageSetup}\n${mathSource}`;
 }
 
 async function transformMDWithoutTypst(
