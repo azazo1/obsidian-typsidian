@@ -57,7 +57,7 @@ export default class TypstSvgElement extends HTMLElement {
 			:host {
 				display: ${this.isinline ? "inline-block" : "block"};
 				text-align: ${this.isinline ? "left" : "center"};
-				vertical-align: -0.125em;
+				vertical-align: ${this.isinline ? "baseline" : "initial"};
 				color: inherit;
 				max-width: 100%;
 				line-height: 0;
