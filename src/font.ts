@@ -16,7 +16,18 @@ interface Window {
 }
 
 export async function fontInit(setFontStr: string) {
-	const fonts = await (window as Window).queryLocalFonts();
+	const queryLocalFonts = (window as Window).queryLocalFonts;
+	if (!setFontStr.trim() || typeof queryLocalFonts !== "function") {
+		return;
+	}
+
+	let fonts: FontData[];
+	try {
+		fonts = await queryLocalFonts.call(window);
+	} catch {
+		return;
+	}
+
 	const setFontNames = setFontStr
 		.split(",")
 		.map((f) => f.trim().toLowerCase());
